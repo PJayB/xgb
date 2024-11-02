@@ -5,6 +5,10 @@
 set -e
 set -o pipefail
 
+# Disable dumb tzdata interactivity (can occur during upgrades/some
+# installations).
+export DEBIAN_FRONTEND=noninteractive
+
 # Install basics
 apt-get update
 apt-get upgrade -y
