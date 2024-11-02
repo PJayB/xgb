@@ -32,7 +32,6 @@ get_apt_repo() {
 create_sources_list() {
     local apt_foreign_arch="$1"
     local apt_foreign_repo="$2"
-    local foreign_sources_list="$3"
     # Create a foreign sources list
     echo "deb [arch=${apt_foreign_arch}] ${apt_foreign_repo} ${ubuntu_version} main restricted
 deb [arch=${apt_foreign_arch}] ${apt_foreign_repo} ${ubuntu_version}-updates main restricted
@@ -40,7 +39,7 @@ deb [arch=${apt_foreign_arch}] ${apt_foreign_repo} ${ubuntu_version} universe
 deb [arch=${apt_foreign_arch}] ${apt_foreign_repo} ${ubuntu_version}-updates universe
 deb [arch=${apt_foreign_arch}] ${apt_foreign_repo} ${ubuntu_version} multiverse
 deb [arch=${apt_foreign_arch}] ${apt_foreign_repo} ${ubuntu_version}-updates multiverse
-deb [arch=${apt_foreign_arch}] ${apt_foreign_repo} ${ubuntu_version}-backports main restricted universe multiverse" > "$foreign_sources_list"
+deb [arch=${apt_foreign_arch}] ${apt_foreign_repo} ${ubuntu_version}-backports main restricted universe multiverse"
 }
 
 apt_native_arch="$(dpkg --print-architecture)"
@@ -56,8 +55,6 @@ for apt_foreign_arch in "$@"; do
 
     apt_foreign_family="$(get_apt_family "$apt_foreign_arch")"
 
-    dpkg --add-architecture "$apt_foreign_arch"
-
     cur_family="${apt_families[$apt_foreign_family]}"
     [ -z "$cur_family" ] || cur_family=",$cur_family"
     apt_families["$apt_foreign_family"]="${apt_foreign_arch}${cur_family}"
@@ -65,10 +62,9 @@ done
 
 for apt_family in "${!apt_families[@]}"; do
     apt_foreign_repo="$(get_apt_repo "$apt_family")"
-    foreign_sources_list="/etc/apt/sources.list.d/$ubuntu_version-$apt_family.list"
 
     archs="${apt_families["$apt_family"]}"
 
     # Create a foreign sources list
-    create_sources_list "$archs" "$apt_foreign_repo" "$foreign_sources_list"
+    create_sources_list "$archs" "$apt_foreign_repo"
 done
