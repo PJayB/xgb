@@ -1,4 +1,7 @@
 #
+# TODO: documentation
+#
+#
 # Installs files to a custom location in the build folder using `src@relative_dst` syntax
 # todo: I kinda hate this in retrospect
 #

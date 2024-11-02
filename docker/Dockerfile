@@ -2,6 +2,8 @@
 # EXAMPLE - DO NOT USE
 # Copy and adapt this to your needs.
 #
+# TODO: documentation
+#
 FROM ubuntu:jammy
 
 COPY scripts /docker

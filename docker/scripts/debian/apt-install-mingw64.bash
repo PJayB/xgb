@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# TODO: documentation
+#
 set -e
 
 apt-get install -y mingw-w64

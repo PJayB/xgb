@@ -1,5 +1,7 @@
 #!/bin/bash
 #
+# TODO: documentation
+#
 # Copy this and adapt it for your project as needed
 #
 set -e

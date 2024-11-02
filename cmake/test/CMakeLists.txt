@@ -1,6 +1,7 @@
+#
+# TODO: documentation
+#
 cmake_minimum_required(VERSION 3.22)
-
-#cmake_policy(SET CMP0156 NEW)
 
 if (NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE Release)

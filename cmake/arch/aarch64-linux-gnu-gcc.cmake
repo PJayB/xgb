@@ -1,3 +1,6 @@
+#
+# TODO: documentation
+#
 set(LINUX 1)
 set(AARCH64 1)
 set(CMAKE_SYSTEM_NAME Linux)

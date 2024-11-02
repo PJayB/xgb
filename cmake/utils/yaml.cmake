@@ -1,3 +1,6 @@
+#
+# TODO: documentation
+#
 find_program(YAMLLINT yamllint
     HINTS /usr/bin)
 

@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# TODO: documentation
+#
 set -e
 set -o pipefail
 

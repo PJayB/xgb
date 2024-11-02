@@ -1,3 +1,6 @@
+#
+# TODO: documentation
+#
 set(CMAKE_SYSTEM_NAME Windows)
 
 set(MINGW 1)

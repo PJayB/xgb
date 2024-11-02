@@ -1,6 +1,8 @@
 #
 # Package files into an Emscripten package
 #
+# TODO: documentation
+#
 find_program(EMSCRIPTEN_PACKAGER
     NAMES file_packager
     HINTS
