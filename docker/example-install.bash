@@ -5,6 +5,11 @@
 set -e
 set -o pipefail
 
+# Add foreign architectures
+dpkg --add-architecture i386 || :
+dpkg --add-architecture x86_64 || :
+dpkg --add-architecture aarch64 || :
+
 # Disable dumb tzdata interactivity (can occur during upgrades/some
 # installations).
 export DEBIAN_FRONTEND=noninteractive
