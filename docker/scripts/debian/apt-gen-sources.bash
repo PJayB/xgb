@@ -4,12 +4,14 @@ set -o pipefail
 
 die() { echo "$*" >&2 ; exit 1 ; }
 
-which lsb_release 1>/dev/null 2>&1 || die "Install lsb_release first"
-
 [ -n "$1" ] || die "Expected architecture"
 
 # Set up some invariants
-ubuntu_version="$(lsb_release -cs)"
+if which lsb_release 1>/dev/null 2>&1 ; then
+    ubuntu_version="$(lsb_release -cs)"
+else
+    ubuntu_version="$(sed -rn 's/^UBUNTU_CODENAME=(.*)$/\1/p' /usr/lib/os-release)"
+fi
 original_sources_list="/etc/apt/sources.list"
 original_sources_list_backup="/etc/apt/sources.list.bak"
 
