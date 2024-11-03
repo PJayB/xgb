@@ -5,20 +5,20 @@
 set -e
 set -o pipefail
 
-readarray -t archs < <(
-    dpkg --print-architecture
-    dpkg --print-foreign-architectures
-    )
-
 args=()
+archs=()
 for i in "$@"; do
     if [[ "$i" == -* ]]; then
         args+=( "$i" )
     else
-        for a in "${archs[@]}"; do
-            args+=( "$i:$a" )
-        done
+        archs+=( "$i" )
     fi
+done
+
+while read -r package ; do
+    for a in "${archs[@]}"; do
+        args+=( "$package:$a" )
+    done
 done
 
 apt-get install "${args[@]}"

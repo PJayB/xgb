@@ -31,14 +31,14 @@ apt-get install -y \
     ;
 
 # Install cross-platform Debian packages
-./debian/apt-install-foreign.bash -y \
-    libglfw3-dev \
-    libgles2-mesa-dev \
-    libopenal1 libopenal-dev \
-    ;
+echo "
+    libglfw3-dev
+    libgles2-mesa-dev
+    libopenal1 libopenal-dev
+" | ./debian/apt-install-foreign.bash -y aarch64 i386 x86_64
 
 # Install foreign architecture toolchains
-./debian/apt-install-cross-g++.bash
+./debian/apt-install-cross-g++.bash aarch64 i386 x86_64
 
 # Install mingw toolchain
 ./debian/apt-install-mingw64.bash
