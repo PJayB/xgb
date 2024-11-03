@@ -5,7 +5,7 @@
 set -e
 set -o pipefail
 
-die() { echo "$*" >&2 ; exit 1 ; 
+die() { echo "$*" >&2 ; exit 1 ; }
 
 case "$(dpkg --print-architecture)" in
 amd64|i386) : ;;
