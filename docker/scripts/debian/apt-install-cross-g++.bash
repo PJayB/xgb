@@ -5,12 +5,6 @@
 set -e
 set -o pipefail
 
-packages=(
-    build-essential
-    ninja-build
-    cmake
-)
-
 # Install foreign architecture toolchains
 native_arch="$(dpkg --print-architecture)"
 while read -r arch ; do

@@ -7,18 +7,7 @@
 set -e
 set -o pipefail
 
-# Add foreign architectures
-dpkg --add-architecture i386 || :
-dpkg --add-architecture x86_64 || :
-dpkg --add-architecture aarch64 || :
-
-# Disable dumb tzdata interactivity (can occur during upgrades/some
-# installations).
-export DEBIAN_FRONTEND=noninteractive
-
 # Install basics
-apt-get update
-apt-get upgrade -y
 apt-get install -y \
     lsb-release \
     git \
@@ -30,16 +19,16 @@ apt-get install -y \
     ;
 
 # Configure apt sources
-./debian/apt-config-aarch64.bash
 ./debian/apt-config-cmake.bash
 #./debian/apt-config-winehq.bash
 apt-get update
 
-# Install toolchains, including foreign architecture toolchains
-./debian/apt-install-toolchains.bash
-
-# Install mingw toolchain
-./debian/apt-install-mingw64.bash
+# Install native toolchain
+apt-get install -y \
+    build-essential \
+    ninja-build \
+    cmake \
+    ;
 
 # Install cross-platform Debian packages
 ./debian/apt-install-foreign.bash -y \
@@ -47,6 +36,12 @@ apt-get update
     libgles2-mesa-dev \
     libopenal1 libopenal-dev \
     ;
+
+# Install foreign architecture toolchains
+./debian/apt-install-cross-g++.bash
+
+# Install mingw toolchain
+./debian/apt-install-mingw64.bash
 
 # Install emscripten SDK
 ./install-emsdk.bash
