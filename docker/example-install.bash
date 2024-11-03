@@ -44,4 +44,4 @@ echo "
 ./debian/apt-install-mingw64.bash
 
 # Install emscripten SDK
-./install-emsdk.bash
+./install-emsdk.bash latest
