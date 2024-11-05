@@ -42,6 +42,8 @@ echo "
 
 # Install mingw toolchain
 ./debian/apt-install-mingw64.bash
+./mingw/install-glfw-mingw.sh
+./mingw/install-openal-mingw.sh
 
 # Install emscripten SDK
 ./install-emsdk.bash latest
