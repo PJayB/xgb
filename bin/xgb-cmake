@@ -182,7 +182,7 @@ fi
 # Check the podman build state
 #
 check_podman_can_build() {
-    which podman || return 1
+    which podman >/dev/null 2>&1 || return 1
     podman image exists "$podman_image" || return 1
 }
 
