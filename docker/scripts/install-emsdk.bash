@@ -19,9 +19,16 @@ fi
 "$emsdk_root/emsdk" install "$emversion"
 "$emsdk_root/emsdk" activate "$emversion"
 
+# Load the Emscipten environment
 source "$emsdk_root/emsdk_env.sh"
+
+# Warm the dependency cache
 embuilder.py --pic build ALL
 
+# Install typescript
+npm install -g typescript
+
+# Set up the environment for subsequent runs
 echo 'export EMSDK_QUIET=1' >> /etc/profile.d/emsdk.sh
 echo 'export EM_FROZEN_CACHE=1' >> /etc/profile.d/emsdk.sh
 echo "source $emsdk_root/emsdk_env.sh" >> /etc/profile.d/emsdk.sh
