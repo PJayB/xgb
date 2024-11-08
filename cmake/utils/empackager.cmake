@@ -40,6 +40,6 @@ endfunction()
 
 function(target_package_for_emscripten target_name data_file_name js_file_name)
     em_package_files(${data_file_name} ${js_file_name} ${ARGN})
-    add_custom_target(${target_name}
-        DEPENDS ${data_file_name} ${js_file_name})
+    add_custom_target(${target_name})
+    target_sources(${target_name} PRIVATE ${data_file_name} ${js_file_name})
 endfunction()

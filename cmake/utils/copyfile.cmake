@@ -54,5 +54,6 @@ function(target_custom_copy_files)
             VERBATIM
             )
     endforeach()
-    add_custom_target(${TARGET_COPY_FILES_TARGET} DEPENDS ${target_paths})
+    add_custom_target(${TARGET_COPY_FILES_TARGET})
+    target_sources(${TARGET_COPY_FILES_TARGET} PRIVATE ${target_paths})
 endfunction()

@@ -34,7 +34,8 @@ function(add_yaml target_name file)
     set(output_file "${CMAKE_CURRENT_BINARY_DIR}/${file}")
 
     copy_yaml(${file} ${output_file})
-    add_custom_target(${target_name} DEPENDS ${output_file})
+    add_custom_target(${target_name})
+    target_sources(${target_name} PRIVATE ${output_file})
 endfunction()
 
 function(target_add_yaml target_name scope)
