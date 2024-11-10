@@ -48,6 +48,13 @@ optional_env() {
     fi
 }
 
+optional_path() {
+    if [ -n "$1" ] && [ -d "$1" ]; then
+        shift
+        echo "$@"
+    fi
+}
+
 set_once() {
     if [ -v "$1" ]; then
         die "'$1' should only be set once"
@@ -57,14 +64,14 @@ set_once() {
 og_args=( "$@" )
 cmake_args=()
 envvars=(
-    $(optional_env "$WINEPREFIX" --env WINEPREFIX="$WINEPREFIX")
-    $(optional_env "$RUSTUP_HOME" --env RUSTUP_HOME="$RUSTUP_HOME")
-    $(optional_env "$CARGO_HOME" --env CARGO_HOME="$CARGO_HOME")
+    $(optional_path "$WINEPREFIX" --env WINEPREFIX="$WINEPREFIX")
+    $(optional_path "$RUSTUP_HOME" --env RUSTUP_HOME="$RUSTUP_HOME")
+    $(optional_path "$CARGO_HOME" --env CARGO_HOME="$CARGO_HOME")
 )
 mounts=(
-    $(optional_env "$WINEPREFIX" -v "$WINEPREFIX:$WINEPREFIX")
-    $(optional_env "$RUSTUP_HOME" -v "$RUSTUP_HOME:$RUSTUP_HOME")
-    $(optional_env "$CARGO_HOME" -v "$CARGO_HOME:$CARGO_HOME")
+    $(optional_path "$WINEPREFIX" -v "$WINEPREFIX:$WINEPREFIX")
+    $(optional_path "$RUSTUP_HOME" -v "$RUSTUP_HOME:$RUSTUP_HOME")
+    $(optional_path "$CARGO_HOME" -v "$CARGO_HOME:$CARGO_HOME")
 )
 
 # Parse the options
