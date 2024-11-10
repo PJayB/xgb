@@ -35,6 +35,11 @@ function(target_custom_copy_files)
             message(FATAL_ERROR "copy_files requires dst in src@dst: " ${arg})
         endif()
 
+        cmake_path(ABSOLUTE_PATH source_file
+            BASE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+            NORMALIZE
+        )
+
         if (IS_DIRECTORY ${dest_path} OR ${dest_path} MATCHES ".*/$")
             cmake_path(GET source_file FILENAME source_filename)
             cmake_path(APPEND dest_path "${source_filename}")
