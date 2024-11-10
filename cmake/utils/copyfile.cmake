@@ -50,7 +50,7 @@ function(target_custom_copy_files)
             DEPENDS
                 ${source_file}
             WORKING_DIRECTORY
-                ${CMAKE_CURRENT_BINARY_DIR}
+                ${CMAKE_CURRENT_SOURCE_DIR}
             VERBATIM
             )
     endforeach()
