@@ -7,7 +7,7 @@
 #
 function(target_custom_copy_files)
     set(options)
-    set(oneValueArgs NAME TARGET)
+    set(oneValueArgs TARGET)
     set(multiValueArgs COMMAND FILES)
     cmake_parse_arguments(TARGET_COPY_FILES "${options}" "${oneValueArgs}"
         "${multiValueArgs}" ${ARGN})

@@ -3,10 +3,45 @@
 #
 find_program(XXD xxd REQUIRED)
 
+function(add_inline_resource target src_path)
+    set(options)
+    set(oneValueArgs OUTPUT WORKING_DIRECTORY)
+    set(multiValueArgs)
+    cmake_parse_arguments(ADD_INLINE_RESOURCES "${options}" "${oneValueArgs}"
+        "${multiValueArgs}" ${ARGN})
+
+    get_filename_component(file "${src_path}" NAME)
+    if (NOT ADD_INLINE_RESOURCES_OUTPUT)
+        set(ADD_INLINE_RESOURCES_OUTPUT "${file}.inl")
+    endif()
+    if (NOT ADD_INLINE_RESOURCES_WORKING_DIRECTORY)
+        set(ADD_INLINE_RESOURCES_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
+    endif()
+
+    get_filename_component(target_file "${ADD_INLINE_RESOURCES_OUTPUT}"
+        REALPATH BASE_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+
+    add_custom_command(
+        OUTPUT
+            ${target_file}
+        COMMAND
+            ${XXD} --include "${file}" > "${target_file}"
+        DEPENDS
+            ${src_path}
+        WORKING_DIRECTORY
+            ${ADD_INLINE_RESOURCES_WORKING_DIRECTORY}
+        VERBATIM
+        )
+
+    add_custom_target(${target})
+    target_sources(${target} PRIVATE ${target_file})
+endfunction()
+
+
 function(add_inline_resources target)
     set(options)
-    set(oneValueArgs NAME OUTPUT WORKING_DIRECTORY)
-    set(multiValueArgs COMMAND FILES)
+    set(oneValueArgs OUTPUT WORKING_DIRECTORY)
+    set(multiValueArgs FILES)
     cmake_parse_arguments(ADD_INLINE_RESOURCES "${options}" "${oneValueArgs}"
         "${multiValueArgs}" ${ARGN})
 
