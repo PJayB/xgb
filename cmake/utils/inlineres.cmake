@@ -4,7 +4,7 @@
 find_program(XXD xxd REQUIRED)
 
 function(add_inline_resource target src_path)
-    set(options)
+    set(options BARE)
     set(oneValueArgs OUTPUT WORKING_DIRECTORY)
     set(multiValueArgs)
     cmake_parse_arguments(ADD_INLINE_RESOURCES "${options}" "${oneValueArgs}"
@@ -17,6 +17,11 @@ function(add_inline_resource target src_path)
     if (NOT ADD_INLINE_RESOURCES_WORKING_DIRECTORY)
         set(ADD_INLINE_RESOURCES_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
     endif()
+    if (ADD_INLINE_RESOURCES_BARE)
+        set(XXD_COMMAND "${CMAKE_COMMAND}" -E cat ${src_path} | ${XXD} --include -C)
+    else()
+        set(XXD_COMMAND ${XXD} --include -C ${src_path})
+    endif()
 
     get_filename_component(target_file "${ADD_INLINE_RESOURCES_OUTPUT}"
         REALPATH BASE_DIR "${CMAKE_CURRENT_BINARY_DIR}")
@@ -25,7 +30,7 @@ function(add_inline_resource target src_path)
         OUTPUT
             ${target_file}
         COMMAND
-            ${XXD} --include "${file}" > "${target_file}"
+            ${XXD_COMMAND} > "${target_file}"
         DEPENDS
             ${src_path}
         WORKING_DIRECTORY
@@ -73,7 +78,7 @@ function(add_inline_resources target)
             OUTPUT
                 ${dest_path}
             COMMAND
-                ${XXD} --include "${file}" > "${dest_path}"
+                ${XXD} --include -C "${file}" > "${dest_path}"
             DEPENDS
                 ${src_path}
             WORKING_DIRECTORY
