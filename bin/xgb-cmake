@@ -16,7 +16,9 @@ help() {
     echo " -i, --podman-image <N>   *Try* to use this podman image to build."
     echo " -F, --force-podman       Error out if the podman image doesn't exist."
     echo " -p, --preset <N>         Use this CMake preset to build."
-    echo " -c, --config             Use this CMake config to build."
+    echo " -t, --target             Use this CMake target to build. Defaults to empty."
+    echo " -c, --config             Use this CMake config to build. Defaults to empty."
+    echo " --debug                  Shorthand for '-c Debug'."
     echo " --release                Shorthand for '-c RelWithDebInfo'."
     echo " --final                  Shorthand for '-c Release'."
     echo " --emscripten             Use emcmake to build."
@@ -77,10 +79,12 @@ mounts=(
 # Parse the options
 while true; do
     case "$1" in
-    -i|--podman-image)  podman_image="$( required_arg "$1" "$2" )" ; shift ;;
+    -i|--podman-image)  set_once podman_image ; podman_image="$( required_arg "$1" "$2" )" ; shift ;;
     -F|--force-podman)  podman_force="yes" ;;
-    -p|--preset)        cmake_preset="$( required_arg "$1" "$2" )" ; shift ;;
+    -t|--target)        set_once cmake_target ; cmake_target="$( required_arg "$1" "$2" )" ; shift ;;
+    -p|--preset)        set_once cmake_preset ; cmake_preset="$( required_arg "$1" "$2" )" ; shift ;;
     -c|--config)        set_once cmake_config ; cmake_config="$( required_arg "$1" "$2" )" ; shift ;;
+    --debug)            set_once cmake_config ; cmake_config="Debug" ;;
     --release)          set_once cmake_config ; cmake_config="RelWithDebInfo" ;;
     --final)            set_once cmake_config ; cmake_config="Release" ;;
     --emscripten)       is_emscripten="yes" ;;
@@ -228,6 +232,9 @@ if [ -n "$is_emscripten" ]; then
 fi
 if [ -n "$cmake_config" ]; then
     build_cmake_args+=( --config "$cmake_config" )
+fi
+if [ -n "$cmake_target" ]; then
+    build_cmake_args+=( --target "$cmake_target" )
 fi
 if [ -n "${cmake_preset}" ]; then
     cmake_args+=( --preset "${cmake_preset}" )
