@@ -6,15 +6,23 @@
 # paths. I'd like to make it more generic in the future, and also have it meddle
 # less in the cmake invocation.
 #
-set -e
-set -o pipefail
+set -eo pipefail
 
 die() { echo "$*" >&2 ; exit 1 ; }
 
 help() {
     echo "$0 [--options...]"
-    echo " -i, --podman-image <N>   *Try* to use this podman image to build."
-    echo " -F, --force-podman       Error out if the podman image doesn't exist."
+    echo
+    echo "Possible actions:"
+    echo " --build                  Run cmake --build (default)."
+    echo " --configure              Run cmake configure."
+    echo " --install                Run cmake --install."
+    echo " --podman-init <PATH>     Create the container."
+    echo " --podman-update <SCRIPT> Execute a script in the container."
+    echo
+    echo "Options:"
+    echo " -i, --podman-image <N>   Try to use this podman image to build, but fall back to native if not found."
+    echo " -F, --force-podman       Error out if the specified podman image doesn't exist."
     echo " -p, --preset <N>         Use this CMake preset to build."
     echo " -t, --target             Use this CMake target to build. Defaults to empty."
     echo " -c, --config             Use this CMake config to build. Defaults to empty."
@@ -22,12 +30,9 @@ help() {
     echo " --release                Shorthand for '-c RelWithDebInfo'."
     echo " --final                  Shorthand for '-c Release'."
     echo " --emscripten             Use emcmake to build."
-    echo " --configure              Run CMake configure instead of building."
     echo " --cmake-trace            Enable CMake tracing."
     echo " -e, --env <K>=<V>        Set this environment var in the container (podman builds only)."
     echo " -v, --mount <...>        Mount this in the container (podman builds only)."
-    echo " --podman-init <PATH>     Create the container (doesn't build)."
-    echo " --podman-update <SCRIPT> Execute a script in the container (doesn't build)."
     echo " --open-log               Open the log file in \$EDITOR."
     echo " --help                   Show this help."
 }
@@ -63,8 +68,6 @@ set_once() {
     fi
 }
 
-og_args=( "$@" )
-cmake_args=()
 envvars=(
     $(optional_path "$WINEPREFIX" --env WINEPREFIX="$WINEPREFIX")
     $(optional_path "$RUSTUP_HOME" --env RUSTUP_HOME="$RUSTUP_HOME")
@@ -77,6 +80,8 @@ mounts=(
 )
 
 # Parse the options
+og_args=( "$@" )
+cmake_args=()
 while true; do
     case "$1" in
     -i|--podman-image)  set_once podman_image ; podman_image="$( required_arg "$1" "$2" )" ; shift ;;
@@ -88,12 +93,18 @@ while true; do
     --release)          set_once cmake_config ; cmake_config="RelWithDebInfo" ;;
     --final)            set_once cmake_config ; cmake_config="Release" ;;
     --emscripten)       is_emscripten="yes" ;;
-    --configure)        do_configure="yes" ;;
-    --cmake-trace)      cmake_args+=( --trace-expand --check-system-vars --debug-find ) ;;
+    --cmake-trace)      do_trace="yes" ;;
     -e|--env)           envvars+=( "$( required_arg "$1" "$2" )" ) ; shift ;;
     -v|--mount)         mounts+=( "$( required_arg "$1" "$2" )" ) ; shift ;;
-    --podman-init)      container_init="$( required_arg "$1" "$2" )" ; shift ;;
-    --podman-update)    container_script="$( required_arg "$1" "$2" )" ; shift ;;
+    --build)            set_once do_action ; do_action="build" ;;
+    --configure)        set_once do_action ; do_action="configure" ;;
+    --install)          set_once do_action ; do_action="install" ;;
+    --podman-init)      set_once do_action ; do_action="podman-init" ; container_init="$( required_arg "$1" "$2" )" ; shift ;;
+    --podman-update)    set_once do_action ; do_action="podman-update" ; container_script="$( required_arg "$1" "$2" )" ; shift ;;
+    --strip|--verbose)
+                        cmake_args+=( "$1" ) ;;
+    --prefix|--component|--default-directory-permissions|-j|--parallel)
+                        cmake_args+=( "$1" "$( required_arg "$1" "$2" )" ); shift ;;
     --open-log)         open_log=yes ;;
     --help|-h)          help ; exit 0 ;;
     --)                 shift ; break ;;
@@ -103,10 +114,10 @@ while true; do
     shift
 done
 
-if [ -z "$podman_image" ] && [ -n "$container_init" ]; then
+if [ -z "$podman_image" ] && [ "$do_action" == "podman-init" ]; then
     die "--podman-init requires --podman-image"
 fi
-if [ -z "$podman_image" ] && [ -n "$container_script" ]; then
+if [ -z "$podman_image" ] && [ "$do_action" == "podman-update" ]; then
     die "--podman-update requires --podman-image"
 fi
 
@@ -170,13 +181,16 @@ update_container() {
 }
 
 # Container operations skip cmake setup
-if [ -n "$container_init" ]; then
+case "$do_action" in
+podman-init)
     init_container
     exit "$?"
-elif [ -n "$container_script" ]; then
+    ;;
+podman-update)
     update_container
     exit "$?"
-fi
+    ;;
+esac
 
 # Msys only:
 # Reinvoke inside clang64 if we're not in that (emscripten needs the clang64
@@ -223,34 +237,39 @@ else
     logfile="$here/build/build.log"
 fi
 
+# Run configure if the directory doesn't exist yet and we're trying to build
+if [ ! -e "$builddir" ] && [ "$do_action" == "build" ]; then
+    bash -l -- "$0" --configure "${og_args[@]}"
+fi
+
 # Set up cmake
 build_cmake=( cmake --build )
-build_cmake_args=()
+build_cmake_args=( )
 configure_cmake=( cmake )
+configure_cmake_args=( -S "${here}" -B "${builddir}" )
+install_cmake=( cmake --install )
+install_cmake_args=( )
 if [ -n "$is_emscripten" ]; then
 	configure_cmake=( "emcmake" "cmake" )
 fi
+if [ -n "$do_trace" ]; then
+    configure_cmake_args+=( --trace-expand --check-system-vars --debug-find )
+fi
 if [ -n "$cmake_config" ]; then
     build_cmake_args+=( --config "$cmake_config" )
+    install_cmake_args+=( --config "$cmake_config" )
 fi
 if [ -n "$cmake_target" ]; then
     build_cmake_args+=( --target "$cmake_target" )
 fi
 if [ -n "${cmake_preset}" ]; then
-    cmake_args+=( --preset "${cmake_preset}" )
+    configure_cmake_args+=( --preset "${cmake_preset}" )
 fi
-
-# Run configure if the directory doesn't exist yet
-if [ ! -e "$builddir" ] && [ -z "$do_configure" ]; then
-    bash -l -- "$0" --configure "${og_args[@]}"
-fi
-
-# Add the cmake preset and dirs
-cmake_args+=( -S "${here}" -B "${builddir}" )
 
 # Add any custom arguments to cmake
-cmake_args+=( "$@" )
-build_cmake_args+=( "$@" )
+configure_cmake_args+=( "${cmake_args[@]}" "$@" )
+build_cmake_args+=( "${cmake_args[@]}" "$@" )
+install_cmake_args+=( "${cmake_args[@]}" "$@" )
 
 mkdir -p "$builddir"
 
@@ -264,14 +283,29 @@ fi
 
 configure() {
     if [ -n "$is_msys" ]; then
-        "${configure_cmake[@]}" "${cmake_args[@]}"
+        "${configure_cmake[@]}" "${configure_cmake_args[@]}"
     elif [ -n "$podman_image" ]; then
         echo \
             "cd '${here}' && " \
-            "${configure_cmake[@]} $(printf "'%s' " "${cmake_args[@]}")" \
+            "${configure_cmake[@]} $(printf "'%s' " "${configure_cmake_args[@]}")" \
             | podman "${podman_args[@]}"
     else
-        "${configure_cmake[@]}" "${cmake_args[@]}"
+        "${configure_cmake[@]}" "${configure_cmake_args[@]}"
+    fi
+}
+
+install() {
+    # todo: make sure that the install directory is mounted outside the
+    # container.
+    if [ -n "$is_msys" ]; then
+        "${install_cmake[@]}" "${builddir}" "${install_cmake_args[@]}"
+    elif [ -n "$podman_image" ]; then
+        echo \
+            "cd '${here}' && " \
+            "${install_cmake[@]} '${builddir}' ${install_cmake_args[@]} && echo 'Done.' " \
+            | podman "${podman_args[@]}"
+    else
+        "${install_cmake[@]}" "${builddir}" "${install_cmake_args[@]}"
     fi
 }
 
@@ -288,8 +322,9 @@ build() {
     fi
 }
 
-if [ -n "$do_configure" ]; then
-    configure 2>&1 | tee "$logfile"
-else
-    build 2>&1 | tee "$logfile"
-fi
+case "$do_action" in
+configure)    configure 2>&1 | tee "$logfile" ;;
+install)      install 2>&1 | tee "$logfile" ;;
+build|"")     build 2>&1 | tee "$logfile" ;;
+*)            die "Unknown command '$do_action'" ;;
+esac
