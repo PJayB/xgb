@@ -18,6 +18,9 @@ set(MINGW_GXX_NAME "${MINGW_TRIPLE}-g++" CACHE STRING "The C++ compiler name to 
 set(MINGW_RC_NAME "${MINGW_TRIPLE}-windres" CACHE STRING "The RC compiler name to use")
 set(MINGW_RANLIB_NAME "${MINGW_TRIPLE}-ranlib" CACHE STRING "The windres compiler name to use")
 
+include(${CMAKE_CURRENT_LIST_DIR}/shared/gcc.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/shared/windows.cmake)
+
 #
 # Set the sysroot
 #
