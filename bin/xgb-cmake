@@ -13,27 +13,55 @@ die() { echo "$*" >&2 ; exit 1 ; }
 help() {
     echo "$0 [--options...]"
     echo
-    echo "Possible actions:"
+    echo "Possible CMake actions:"
     echo " --build                  Run cmake --build (default)."
+    echo
     echo " --configure              Run cmake configure."
+    echo
     echo " --install                Run cmake --install."
-    echo " --podman-init <PATH>     Create the container."
-    echo " --podman-update <SCRIPT> Execute a script in the container."
+    echo
+    echo "Possible podman actions:"
+    echo
+    echo " --podman-init <PATH>     Create a podman image from a Dockerfile."
+    echo
+    echo " --podman-update <SCRIPT> Execute a script in a container, then commit the
+                          result to the image. Useful for updating the podman image with
+                          new build dependencies, etc."
     echo
     echo "Options:"
-    echo " -i, --podman-image <N>   Try to use this podman image to build, but fall back to native if not found."
-    echo " -F, --force-podman       Error out if the specified podman image doesn't exist."
+    echo " -i, --podman-image <N>   Try to use this podman image to build, but fall back
+                          to native if not found. (Can also be set with
+                          XGB_PODMAN_IMAGE.)"
+    echo
+    echo " -F, --force-podman       Error out if the specified podman image
+                          doesn't exist."
+    echo
     echo " -p, --preset <N>         Use this CMake preset to build."
-    echo " -t, --target             Use this CMake target to build. Defaults to empty."
-    echo " -c, --config             Use this CMake config to build. Defaults to empty."
+    echo
+    echo " -t, --target             Use this CMake target to build. Defaults to
+                          empty."
+    echo
+    echo " -c, --config             Use this CMake config to build. Defaults to
+                          empty."
+    echo
     echo " --debug                  Shorthand for '-c Debug'."
+    echo
     echo " --release                Shorthand for '-c RelWithDebInfo'."
+    echo
     echo " --final                  Shorthand for '-c Release'."
+    echo
     echo " --emscripten             Use emcmake to build."
+    echo
     echo " --cmake-trace            Enable CMake tracing."
-    echo " -e, --env <K>=<V>        Set this environment var in the container (podman builds only)."
-    echo " -v, --mount <...>        Mount this in the container (podman builds only)."
+    echo
+    echo " -e, --env <K>=<V>        Set this environment var in the container
+                          (podman builds only)."
+    echo
+    echo " -v, --mount <...>        Mount this in the container (podman builds
+                          only)."
+    echo
     echo " --open-log               Open the log file in \$EDITOR."
+    echo
     echo " --help                   Show this help."
 }
 
@@ -114,6 +142,9 @@ while true; do
     shift
 done
 
+if [ -z "$podman_image" ] && [ -n "${XGB_PODMAN_IMAGE}" ]; then
+    podman_image="${XGB_PODMAN_IMAGE}"
+fi
 if [ -z "$podman_image" ] && [ "$do_action" == "podman-init" ]; then
     die "--podman-init requires --podman-image"
 fi
