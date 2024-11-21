@@ -1,7 +1,11 @@
 #
 # Generates an .inl file containing file contents for #including in C/C++ directly
 #
-find_program(XXD xxd REQUIRED)
+
+#
+# Download and install inline-it from https://github.com/PJayB/inline-it
+#
+find_program(INLINE_IT inline-it REQUIRED)
 
 function(add_inline_resource target src_path)
     set(options BARE)
@@ -18,9 +22,9 @@ function(add_inline_resource target src_path)
         set(ADD_INLINE_RESOURCES_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
     endif()
     if (ADD_INLINE_RESOURCES_BARE)
-        set(XXD_COMMAND "${CMAKE_COMMAND}" -E cat ${src_path} | ${XXD} --include -C)
+        set(INLINE_IT_COMMAND ${INLINE_IT} -b)
     else()
-        set(XXD_COMMAND ${XXD} --include -C ${src_path})
+        set(INLINE_IT_COMMAND ${INLINE_IT})
     endif()
 
     get_filename_component(target_file "${ADD_INLINE_RESOURCES_OUTPUT}"
@@ -30,7 +34,7 @@ function(add_inline_resource target src_path)
         OUTPUT
             ${target_file}
         COMMAND
-            ${XXD_COMMAND} > "${target_file}"
+            ${INLINE_IT_COMMAND} -o "${target_file}" ${src_path}
         DEPENDS
             ${src_path}
         WORKING_DIRECTORY
@@ -78,7 +82,7 @@ function(add_inline_resources target)
             OUTPUT
                 ${dest_path}
             COMMAND
-                ${XXD} --include -C "${file}" > "${dest_path}"
+                ${INLINE_IT} -o "${dest_path}" "${file}"
             DEPENDS
                 ${src_path}
             WORKING_DIRECTORY
