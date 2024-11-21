@@ -11,4 +11,3 @@ add_definitions(-D_WIN32)
 add_definitions(-D_WINDOWS)
 
 include(${CMAKE_CURRENT_LIST_DIR}/shared/msvc.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/shared/windows.cmake)

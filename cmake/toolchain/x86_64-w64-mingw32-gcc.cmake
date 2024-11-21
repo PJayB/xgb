@@ -19,7 +19,6 @@ set(MINGW_RC_NAME "${MINGW_TRIPLE}-windres" CACHE STRING "The RC compiler name t
 set(MINGW_RANLIB_NAME "${MINGW_TRIPLE}-ranlib" CACHE STRING "The windres compiler name to use")
 
 include(${CMAKE_CURRENT_LIST_DIR}/shared/gcc.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/shared/windows.cmake)
 
 #
 # Set the sysroot
