@@ -12,7 +12,8 @@ add_definitions(-DWIN32)
 add_definitions(-D_WIN32)
 add_definitions(-D_WINDOWS)
 
-set(MINGW_TRIPLE "x86_64-w64-mingw32" CACHE STRING "The target triple to use")
+set(CMAKE_SYSTEM_PROCESSOR "x86_64" CACHE STRING "The target processor")
+set(MINGW_TRIPLE "${CMAKE_SYSTEM_PROCESSOR}-w64-mingw32" CACHE STRING "The target triple to use")
 set(MINGW_GCC_NAME "${MINGW_TRIPLE}-gcc" CACHE STRING "The C compiler name to use")
 set(MINGW_GXX_NAME "${MINGW_TRIPLE}-g++" CACHE STRING "The C++ compiler name to use")
 set(MINGW_RC_NAME "${MINGW_TRIPLE}-windres" CACHE STRING "The RC compiler name to use")
@@ -36,9 +37,10 @@ else()
     # set(MINGW_DLL_PATH /usr/lib/gcc/x86_64-w64-mingw32/<VERSION>)
 endif()
 
-set(CMAKE_FIND_ROOT_PATH ${MINGW_ROOT})
-set(CMAKE_SYSTEM_PREFIX_PATH ${MINGW_ROOT})
-set(CMAKE_STAGING_PREFIX ${MINGW_ROOT})
+set(CMAKE_FIND_ROOT_PATH ${MINGW_ROOT} CACHE STRING "The location to search for files")
+set(CMAKE_SYSTEM_PREFIX_PATH ${MINGW_ROOT} CACHE STRING "The location of system headers and libraries")
+#set(CMAKE_STAGING_PREFIX ${MINGW_ROOT} CACHE STRING "The path to install to when cross-compiling")
+set(CMAKE_FIND_NO_INSTALL_PREFIX ON) # Don t search the staging prefix when looking for files
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
