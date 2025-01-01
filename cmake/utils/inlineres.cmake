@@ -8,7 +8,7 @@
 find_program(INLINE_IT inline-it REQUIRED)
 
 function(add_inline_resource target src_path)
-    set(options BARE)
+    set(options BARE NULL_TERMINATE)
     set(oneValueArgs OUTPUT WORKING_DIRECTORY)
     set(multiValueArgs)
     cmake_parse_arguments(ADD_INLINE_RESOURCES "${options}" "${oneValueArgs}"
@@ -27,6 +27,11 @@ function(add_inline_resource target src_path)
         set(INLINE_IT_COMMAND ${INLINE_IT})
     endif()
 
+    set(NULL_TERMINATE_SWITCH "")
+    if (ADD_INLINE_RESOURCES_NULL_TERMINATE)
+        set(NULL_TERMINATE_SWITCH "-z")
+    endif()
+
     get_filename_component(target_file "${ADD_INLINE_RESOURCES_OUTPUT}"
         REALPATH BASE_DIR "${CMAKE_CURRENT_BINARY_DIR}")
 
@@ -34,7 +39,7 @@ function(add_inline_resource target src_path)
         OUTPUT
             ${target_file}
         COMMAND
-            ${INLINE_IT_COMMAND} -o "${target_file}" ${src_path}
+            ${INLINE_IT_COMMAND} ${NULL_TERMINATE_SWITCH} -o "${target_file}" ${src_path}
         DEPENDS
             ${src_path}
         WORKING_DIRECTORY
@@ -48,7 +53,7 @@ endfunction()
 
 
 function(add_inline_resources target)
-    set(options)
+    set(options NULL_TERMINATE)
     set(oneValueArgs OUTPUT WORKING_DIRECTORY)
     set(multiValueArgs FILES)
     cmake_parse_arguments(ADD_INLINE_RESOURCES "${options}" "${oneValueArgs}"
@@ -62,6 +67,11 @@ function(add_inline_resources target)
     endif()
     if (NOT ADD_INLINE_RESOURCES_FILES)
         message(FATAL_ERROR "FILES not set.")
+    endif()
+
+    set(NULL_TERMINATE_SWITCH "")
+    if (ADD_INLINE_RESOURCES_NULL_TERMINATE)
+        set(NULL_TERMINATE_SWITCH "-z")
     endif()
 
     get_filename_component(target_file "${ADD_INLINE_RESOURCES_OUTPUT}"
@@ -82,7 +92,7 @@ function(add_inline_resources target)
             OUTPUT
                 ${dest_path}
             COMMAND
-                ${INLINE_IT} -o "${dest_path}" "${file}"
+                ${INLINE_IT} ${NULL_TERMINATE_SWITCH} -o "${dest_path}" "${file}"
             DEPENDS
                 ${src_path}
             WORKING_DIRECTORY
