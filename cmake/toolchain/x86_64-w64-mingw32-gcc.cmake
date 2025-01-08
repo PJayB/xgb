@@ -83,7 +83,7 @@ function (mingw_copy_dlls target)
             TARGET ${target}
                 POST_BUILD
                 COMMAND ${CMAKE_COMMAND}
-                ARGS -E copy "${dll}" ${COPY_DLL_TARGET_PATH}/
+                ARGS -E copy_if_different "${dll}" ${COPY_DLL_TARGET_PATH}/
                 VERBATIM)
     endforeach()
 endfunction()
