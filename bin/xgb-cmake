@@ -102,9 +102,9 @@ envvars=(
     $(optional_path "$CARGO_HOME" --env CARGO_HOME="$CARGO_HOME")
 )
 mounts=(
-    $(optional_path "$WINEPREFIX" -v "$WINEPREFIX:$WINEPREFIX")
-    $(optional_path "$RUSTUP_HOME" -v "$RUSTUP_HOME:$RUSTUP_HOME")
-    $(optional_path "$CARGO_HOME" -v "$CARGO_HOME:$CARGO_HOME")
+    $(optional_path "$WINEPREFIX" -v "$WINEPREFIX:$WINEPREFIX:z")
+    $(optional_path "$RUSTUP_HOME" -v "$RUSTUP_HOME:$RUSTUP_HOME:z")
+    $(optional_path "$CARGO_HOME" -v "$CARGO_HOME:$CARGO_HOME:z")
 )
 
 # Parse the options
@@ -154,13 +154,13 @@ fi
 
 # Set up common args for running stuff in the container
 podman_volume_args=(
-    "-v$here:$here"
+    "-v$here:$here:z"
     "${mounts[@]}"
 )
 # Mount the custom script into the container too
 if [ -n "$container_script" ]; then
     container_script="$( realpath "$container_script" )"
-    podman_volume_args+=( "-v$container_script:$container_script" )
+    podman_volume_args+=( "-v$container_script:$container_script:z" )
 fi
 
 # Add the environment variables to the podman command lines
